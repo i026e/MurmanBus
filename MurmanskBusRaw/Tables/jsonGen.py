@@ -4,12 +4,14 @@ Created on Tue Sep 16 08:27:01 2014
 
 @author: pavel
 """
-import csv, sys
-import json
+import csv, sys, os.path, json
+
 from itertools import izip
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
+
+result_filename="deparures.json"
 
 delimiter = ';'
 asterisk='*'
@@ -23,9 +25,10 @@ sat_d = "saturday"
 dep="departures"
 off="offsets"
 
-south_off_values={'5.txt':9,'18.txt':6}
+bus_ids = ["a1", "a3t", "a4","a4t","a5","a6t","a10","a11","a18","a19","a24","a25","a27d","a27g", "a29", "a31","a33"]
+south_off_values={'a5':9,'a18':6}
 
-dictionary = {from_N:{work_d:{}, sat_d:{},sun_d:{}}, from_S:{work_d:{}, sat_d:{},sun_d:{}}}
+departures = {}
 day_order = [work_d, sat_d, sun_d]
 
 import StringIO
@@ -101,29 +104,37 @@ def get_lists(string):
     f = StringIO.StringIO(string)
     reader = get_csv_reader(f)
     a = transpose(reader)
-    south, north = split_table(a)
-    return south, north
-
-def main(filename):
-    f = open(filename, 'r')
-    i = 0
-    for day in split_days(f):
-        if i > 2: break
-	south_offset_val = south_off_values.get(filename, 1)
-	
-        south, north = get_lists(day)
-        south_offset = offset_gen(south,south_offset_val)
-        north_offset = offset_gen(north)
+    south_deps, north_deps = split_table(a)
+    return south_deps, north_deps
+    
+def main():
+    for bus in bus_ids:
+        filename = bus+'.txt'
+        if not os.path.exists(filename):
+            break
+        f = open(filename, 'r')
+        i = 0
+        dictionary = {from_N:{work_d:{}, sat_d:{},sun_d:{}}, from_S:{work_d:{}, sat_d:{},sun_d:{}}}
+        for day in split_days(f):
+            if i > 2: break
+            south_offset_val = south_off_values.get(bus, 0) 
+            south_deps, north_deps = get_lists(day)
+            south_offset = offset_gen(south_deps,south_offset_val, 0)
+            north_offset = offset_gen(north_deps,0,0)
+            
+            
         #south = format_list(south)
         #north = format_list(north)
         
-        dictionary[from_N][day_order[i]][dep] = format_list(north)
-        dictionary[from_N][day_order[i]][off] = north_offset
-        dictionary[from_S][day_order[i]][dep] = format_list(south)
-        dictionary[from_S][day_order[i]][off] = south_offset
-        i+=1
-        
-    write(json.dumps(dictionary, ensure_ascii=False), filename+'.json')
+            dictionary[from_N][day_order[i]][dep] = format_list(north_deps)
+            dictionary[from_N][day_order[i]][off] = north_offset
+            dictionary[from_S][day_order[i]][dep] = format_list(south_deps)
+            dictionary[from_S][day_order[i]][off] = south_offset
+            i+=1
+            
+        departures[bus] = dictionary
+        f.close()
+    write(json.dumps(departures, ensure_ascii=False, indent=1, sort_keys=True), result_filename)
     #
     #a = transpose(reader)
     #one, another = split_table(a)
@@ -133,6 +144,5 @@ def main(filename):
     #f.close()
 
 
-if __name__ == '__main__':
-    for filename in  sys.argv[1:]:
-        main(filename)
+if __name__ == '__main__':    
+    main()

@@ -60,7 +60,7 @@ def main():
                 title = iD.group(0).strip()
                 table = repr(get_table(soup)[1].contents[3])
                 print title
-                write(title+'.txt', clear_table(table))
+                write('a'+title+'.txt', clear_table(table))
 #print links[-1]
 #l = "/index.php?option=com_content&view=article&id=585&Itemid=73"
 #a= get_table(host+l)[1]

@@ -4,7 +4,8 @@ Android приложение с расписанием автобусов для
 
 
 Установка:
-Загрузите и запустите https://github.com/i026e/MurmanBus/blob/master/MurmanskBus/bin/MurmanskBus.apk
+=========
+Загрузите и запустите https://github.com/i026e/MurmanBus/blob/master/MurmanskBus/bin/MurmanskBus.apk?raw=true
 
 
 
